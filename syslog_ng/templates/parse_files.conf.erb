@@ -1,0 +1,133 @@
+## This file is managed by puppet
+
+# <%= @priority -%>-<%= @name %>
+# Owner: root
+# Group: log
+
+<% j = 0 -%>
+<%- if @files.is_a? Array -%>
+  <%- files.each do |file| -%>
+source s_<%= @name -%>_<%= j -%> {
+   file("<%= file -%>"
+   <%- if not @files_program_override.empty? -%>
+      program_override("<%= @files_program_override -%>")
+   <%- end -%>
+   <%- if not @files_flags.empty? -%>
+      flags(<%= @files_flags -%>)
+   <%- end -%>
+   <%- if not @default_facility.empty? -%>
+      default-facility("<%= @default_facility -%>")
+   <%- end -%>
+   <%- if not @default_priority.empty? -%>
+      default-priority("<%= @default_priority -%>")
+   <%- end -%>
+   );
+};
+    <%- j += 1 -%>
+  <%- end -%>
+<%- else -%>
+source s_<%= @name -%>_<%= j -%> {
+   file("<%= @files -%>" 
+   <%- if not @files_program_override.empty? -%>
+      program_override("<%= @files_program_override -%>")
+   <%- end -%>
+   <%- if not @files_flags.empty? -%>
+      flags(<%= @files_flags -%>)
+   <%- end -%>
+   <%- if not @default_facility.empty? -%>
+      default-facility("<%= @default_facility -%>")
+   <%- end -%>
+   <%- if not @default_priority.empty? -%>
+      default-priority("<%= @default_priority -%>")
+   <%- end -%>
+   );
+};
+<%- end -%>
+
+<%- if @parser_enable -%>
+parser p_<%= @name -%> {
+   <%- if @parser_columns.is_a? Array -%>
+   csv-parser(columns("<%= @parser_columns.join('", "') -%>")
+   <%- else -%>
+   csv-parser(columns("<%= @parser_columns -%>")
+   <%- end -%>
+      delimiters("<%= @parser_delimiters -%>")
+   <%- if @parser_flags -%>
+      flags(<%= @parser_flags -%>)
+   <%- end -%>
+   );
+};
+<%- end -%>
+
+<%- if @rewrite_enable -%>
+  <%- if @rewrite_set.is_a? Array -%>
+rewrite r_<%= @name -%> { set("<%= @rewrite_set.join(" ") -%>", value("MESSAGE")); };
+  <%- else -%>
+rewrite r_<%= @name -%> { set("<%= @rewrite_set -%>", value("MESSAGE")); };
+  <%- end -%>
+<%- end -%>
+
+<%- i = 0 -%>
+<%- if scope.lookupvar('syslog_ng::dest_server').is_a? Array -%>
+  <%- scope.lookupvar('syslog_ng::dest_server').each do |serv| -%>
+    <%- if @files.is_a? Array -%>
+      <%- j = 0 -%>
+      <%- files.each do |file| -%>
+log {
+   source(s_<%= @name -%>_<%= j -%>);
+        <%- if @parser_enable -%>
+   parser(p_<%= @name -%>);
+        <%- end -%>
+        <%- if @rewrite_enable -%>
+   rewrite(r_<%= @name -%>);
+        <%- end -%>
+   destination(<%= "d_logsrv#{i}" -%>);
+};
+        <%- j += 1 -%>
+      <%- end -%>
+    <%- else -%>
+log {
+   source(s_<%= @name -%>_<%= j -%>);
+        <%- if @parser_enable -%>
+   parser(p_<%= @name -%>);
+        <%- end -%>
+        <%- if @rewrite_enable -%>
+   rewrite(r_<%= @name -%>);
+        <%- end -%>
+   destination(<%= "d_logsrv#{i}" -%>);
+};
+   
+      <%- i += 1 -%>
+    <%- end -%>
+  <%- end -%>
+<%- else -%>
+  <%- if @files.is_a? Array -%>
+    <%- j = 0 -%>
+    <%- files.each do |file| -%>
+log {
+   source(s_<%= @name -%>_<%= j -%>);
+      <%- if @parser_enable -%>
+   parser(p_<%= @name -%>);
+      <%- end -%>
+      <%- if @rewrite_enable -%>
+   rewrite(r_<%= @name -%>);
+      <%- end -%>
+   destination(<%= "d_logsrv#{i}" -%>);
+};
+      <%- j += 1 -%>
+    <%- end -%>
+  <%- else -%>
+log {
+   source(s_<%= @name -%>_<%= j -%>);
+      <%- if @parser_enable -%>
+   parser(p_<%= @name -%>);
+      <%- end -%>
+      <%- if @rewrite_enable -%>
+   rewrite(r_<%= @name -%>);
+      <%- end -%>
+   destination(<%= "d_logsrv#{i}" -%>);
+};
+
+  <%- end -%>
+<%- end -%>
+

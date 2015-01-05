@@ -1,0 +1,21 @@
+## This file is managed by puppet
+
+# 10sources.conf
+# Owner: root
+# Group: log
+
+<%- i = 0 -%>
+<%- if @src_name.is_a? Array -%>
+  <%- @src_name.each do |src| -%>
+source <%= src %> {
+   udp(ip("<%= @ip_addr[i] %>") port(<%= @port[i] %>));
+   tcp(ip("<%= @ip_addr[i] %>") port(<%= @port[i] %>));
+};
+  <%- i += 1 -%>
+  <%- end -%>
+<%- else -%>
+source <%= @src_name %>
+   udp(ip("<%= @ip_addr[i] %>") port(<%= @port[i] %>));
+   tcp(ip("<%= @ip_addr[i] %>") port(<%= @port[i] %>));
+};
+<%- end -%>

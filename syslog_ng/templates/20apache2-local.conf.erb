@@ -1,0 +1,43 @@
+## This file is managed by puppet
+
+## send all puppet logs to a central log server
+
+filter f_apache_all    { facility("<%= scope.lookupvar('apache2::params::apache2_log_facility') -%>") and program("apache2"); };
+filter f_apache_access { facility("<%= scope.lookupvar('apache2::params::apache2_log_facility') -%>") and level("<%= scope.lookupvar('apache2::params::apache2_log_priority') -%>") ; };
+filter f_apache_error  { facility("<%= scope.lookupvar('apache2::params::apache2_log_facility') -%>") and not level("<%= scope.lookupvar('apache2::params::apache2_log_priority') -%>"); };
+
+filter f_apache_socket     { filter(f_apache_access) and program("<%= scope.lookupvar('apache2::params::apache2_log_tag_socket') -%>"); };
+filter f_apache_no_ssl     { filter(f_apache_access) and program("<%= scope.lookupvar('apache2::params::apache2_log_tag_no_ssl') -%>"); };
+filter f_apache_ssl        { filter(f_apache_access) and program("<%= scope.lookupvar('apache2::params::apache2_log_tag_ssl') -%>"); };
+filter f_apache_socket_err { filter(f_apache_error) and program("<%= scope.lookupvar('apache2::params::apache2_log_tag_socket') -%>"); };
+filter f_apache_no_ssl_err { filter(f_apache_error) and program("<%= scope.lookupvar('apache2::params::apache2_log_tag_no_ssl') -%>"); };
+filter f_apache_ssl_err    { filter(f_apache_error) and program("<%= scope.lookupvar('apache2::params::apache2_log_tag_ssl') -%>"); };
+filter f_apache_rest       { filter(f_apache_all) and not filter(f_apache_socket) and not filter(f_apache_no_ssl)
+                             and not filter(f_apache_ssl) and not filter(f_apache_socket_err) 
+                             and not filter(f_apache_no_ssl_err) and not filter(f_apache_ssl_err) ; };
+
+destination d_apache_socket     { file("/var/log/apache2/<%= hostname -%>_socket_access.log"); };
+destination d_apache_no_ssl     { file("/var/log/apache2/<%= hostname -%>_no-ssl_access.log"); };
+destination d_apache_ssl        { file("/var/log/apache2/<%= hostname -%>_ssl_access.log"); };
+destination d_apache_socket_err { file("/var/log/apache2/<%= hostname -%>_socket_error.log"); };
+destination d_apache_no_ssl_err { file("/var/log/apache2/<%= hostname -%>_no-ssl_error.log"); };
+destination d_apache_ssl_err    { file("/var/log/apache2/<%= hostname -%>_ssl_error.log"); };
+destination d_apache_rest       { file("/var/log/apache2/<%= hostname -%>_error.log"); };
+
+log { source(s_src); filter(f_apache_socket);     destination(d_apache_socket); };
+log { source(s_src); filter(f_apache_no_ssl);     destination(d_apache_no_ssl); };
+log { source(s_src); filter(f_apache_ssl);        destination(d_apache_ssl); };
+log { source(s_src); filter(f_apache_socket_err); destination(d_apache_socket_err); };
+log { source(s_src); filter(f_apache_no_ssl_err); destination(d_apache_no_ssl_err); };
+log { source(s_src); filter(f_apache_ssl_err);    destination(d_apache_ssl_err); };
+log { source(s_src); filter(f_apache_rest);    destination(d_apache_rest); };
+
+<% i = 0 -%>
+<%- if @dest_server.is_a? Array -%>
+  <%- dest_server.each do |serv| -%>
+log { source(s_src); filter(f_apache_all); destination(<%= "d_logsrv#{i}" -%>); };
+  <%- i += 1 -%>
+  <%- end -%>
+<%- else -%>
+log { source(s_src); filter(f_apache_all); destination(<%= "d_logsrv#{i}" -%>); };
+<%- end -%>

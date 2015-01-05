@@ -1,0 +1,16 @@
+## This file is managed by puppet
+
+## send all puppet logs to a central log server
+
+filter f_puppet { facility("daemon"); };
+
+<%- i = 0 -%>
+<%- if @dest_server.is_a? Array -%>
+  <%- dest_server.each do |serv| -%>
+log { source(s_src); filter(f_puppet); destination(<%= "d_logsrv#{i}" -%>); };
+    <%- i += 1 -%>
+  <%- end -%>
+<%- else -%>
+log { source(s_src); filter(f_puppet); destination(<%= "d_logsrv#{i}" -%>); };
+<%- end -%>
+

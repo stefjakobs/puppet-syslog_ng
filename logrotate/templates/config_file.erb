@@ -1,0 +1,61 @@
+## This file is managed by puppet
+
+<%- if @rotate_files.is_a? Array -%>
+<% @rotate_files.each do |file| -%>
+<%= file %>
+<%- end -%>
+<%- else -%>
+<%= @rotate_files %>
+<% end -%>
+{
+	<%= @interval %>
+	<%- if @missingok -%>
+	missingok
+	<%- end -%>
+	rotate <%= @rotate %>
+	<%- if @delaycompress or @compress-%>
+	compress
+	<%- end -%>
+	<%- if @delaycompress -%>
+	delaycompress
+	<%- end -%>
+	<%- if !@olddir.empty? -%>
+	olddir <%= @olddir %>
+	<%- end -%>
+	<%- if @dateext -%>
+	dateext
+	<%- end -%>
+	<%- if !@dateformat.empty? -%>
+	dateformat <%= @dateformat %>
+	<%- end -%>
+	<%- if @dateyesterday -%>
+	dateyesterday
+	<%- end -%>
+	<%- if @notifempty -%>
+	notifempty
+	<%- end -%>
+	<%- if !@maxage.empty? -%>
+	maxage <%= @maxage %>
+	<%- end -%>
+	<%- if !@minsize.empty? -%>
+	minsize <%= @minsize %>
+	<%- end -%>
+	<%- if !@maxsize.empty? -%>
+	maxsize <%= @maxsize %>
+	<%- end -%>
+	<%- if !@size.empty? -%>
+	size <%= @size %>
+	<%- end -%>
+	<%- if !@p_scripts.empty? -%>
+	sharedscripts
+	postrotate
+	    <%- if @p_scripts.is_a? Array -%>
+		<%- @p_scripts.each do |script| -%>
+		    <%= script %>
+		<%- end -%>
+		<%- else -%>
+            <%= @p_scripts %>
+		<%- end -%>
+	endscript
+	<%- end -%>
+}

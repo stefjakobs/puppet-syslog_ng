@@ -1,0 +1,49 @@
+## This file is managed by Puppet
+
+## send all Zarafa logs to a central logserver
+
+filter f_zarafa { program("zarafa-server")   or program("zarafa-dagent")  or
+                  program("zarafa-spooler")  or program("zarafa-monitor") or
+                  program("zarafa-gateway")  or program("zarafa-search")  or
+                  program("zarafa-licensed") or program("zarafa-ical"); };
+
+## each log in a separate file
+filter f_local_z-audit    { program("zarafa-server")   and facility(auth,authpriv); };
+filter f_local_z-server   { program("zarafa-server")   and facility(mail); };
+filter f_local_z-dagent   { program("zarafa-dagent")   and facility(mail); };
+filter f_local_z-spooler  { program("zarafa-spooler")  and facility(mail); };
+filter f_local_z-monitor  { program("zarafa-monitor")  and facility(mail); };
+filter f_local_z-gateway  { program("zarafa-gateway")  and facility(mail); };
+filter f_local_z-search   { program("zarafa-search")   and facility(mail); };
+filter f_local_z-licensed { program("zarafa-licensed") and facility(mail); };
+filter f_local_z-ical     { program("zarafa-ical")     and facility(mail); };
+
+destination d_local_z-audit    { file("/var/log/zarafa/audit.log"); };
+destination d_local_z-server   { file("/var/log/zarafa/server.log"); };
+destination d_local_z-dagent   { file("/var/log/zarafa/dagent.log"); };
+destination d_local_z-spooler  { file("/var/log/zarafa/spooler.log"); };
+destination d_local_z-monitor  { file("/var/log/zarafa/monitor.log"); };
+destination d_local_z-gateway  { file("/var/log/zarafa/gateway.log"); };
+destination d_local_z-search   { file("/var/log/zarafa/search.log"); };
+destination d_local_z-licensed { file("/var/log/zarafa/licensed.log"); };
+destination d_local_z-ical     { file("/var/log/zarafa/ical.log"); };
+
+log { source(s_src); filter(f_local_z-audit);    destination(d_local_z-audit); };
+log { source(s_src); filter(f_local_z-server);   destination(d_local_z-server); };
+log { source(s_src); filter(f_local_z-dagent);   destination(d_local_z-dagent); };
+log { source(s_src); filter(f_local_z-spooler);  destination(d_local_z-spooler); };
+log { source(s_src); filter(f_local_z-monitor);  destination(d_local_z-monitor); };
+log { source(s_src); filter(f_local_z-gateway);  destination(d_local_z-gateway); };
+log { source(s_src); filter(f_local_z-search);   destination(d_local_z-search); };
+log { source(s_src); filter(f_local_z-licensed); destination(d_local_z-licensed); };
+log { source(s_src); filter(f_local_z-ical);     destination(d_local_z-ical); };
+
+<%- i = 0 -%>
+<%- if @dest_server.is_a? Array -%>
+  <%- dest_server.each do |serv| -%>
+log { source(s_src); filter(f_zarafa); destination(<%= "d_logsrv#{i}" -%>); };
+    <%- i += 1 -%>
+  <%- end -%>
+<%- else -%>
+log { source(s_src); filter(f_zarafa); destination(<%= "d_logsrv#{i}" -%>); };
+<%- end -%>

@@ -1,0 +1,26 @@
+## This file is managed by Puppet
+
+# 90fallback.conf
+# Owner: root
+# Group: log
+
+# -------------------------- #
+# alles was noch uebrig ist. #
+#     !! GEFAEHRLICH !!      #
+#       ! nur debug !        #
+# -------------------------- #
+
+destination d_fallback { file("`prefix`/fallback"); };
+log {
+<%- i = 0 -%>
+<%- if @src_name.is_a? Array -%>
+  <%- @src_name.each do |src| -%>
+   source(<%= src %>);
+  <%- i += 1 -%>
+  <%- end -%>
+<%- else -%>
+   source(<%= @src_name %>);
+<%- end -%>
+   destination(d_fallback); flags(fallback);
+};
+

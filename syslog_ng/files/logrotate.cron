@@ -1,0 +1,4 @@
+## This file is managed by puppet
+
+# execute logrotate at midnight
+00 0     * * *     root /usr/local/sbin/run-logrotate.sh

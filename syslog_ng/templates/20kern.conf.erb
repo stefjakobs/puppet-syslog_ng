@@ -1,0 +1,18 @@
+## This file is managed by puppet
+
+## send all puppet logs to a central log server
+
+## already defined in syslog-ng.conf
+##filter f_kern { facility(kern) and not filter(f_debug); };
+
+#filter f_kernel_only { filter(f_kern) and program("kernel"); };
+
+<%- i = 0 -%>
+<%- if @dest_server.is_a? Array -%>
+  <%- dest_server.each do |serv| -%>
+log { source(s_src); filter(f_kern); destination(<%= "d_logsrv#{i}" -%>); };
+    <%- i += 1 -%>
+  <%- end -%>
+<%- else -%>
+log { source(s_src); filter(f_kern); destination(<%= "d_logsrv#{i}" -%>); };
+<%- end -%>

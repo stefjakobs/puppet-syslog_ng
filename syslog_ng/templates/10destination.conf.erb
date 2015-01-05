@@ -1,0 +1,27 @@
+## This file is managed by Puppet
+
+## central log server
+
+<%- i = 0 -%>
+<%- if @dest_server.is_a? Array -%>
+  <%- dest_server.each do |serv| -%>
+<%= "destination d_logsrv#{i}" -%> { <%= @dest_proto -%>("<%= serv -%>" port(<%= @dest_port -%>)); };
+    <%- i += 1 -%>
+  <%- end -%>
+<%- else -%>
+<%= "destination d_logsrv#{i}" -%> { <%= @dest_proto -%>("<%= @dest_server -%>" port(<%= @dest_port -%>)); };
+<%- end -%>
+<%- if @all_to_dest_server == 'yes' -%>
+<%- i = 0 -%>
+#
+## All messages send to central log server
+#
+  <%- if @dest_server.is_a? Array -%>
+    <%- dest_server.each do |serv| -%>
+log { source(s_src); destination(<%= "d_logsrv#{i}" -%>); };
+      <%- i += 1 -%>
+    <%- end -%>
+  <%- else -%>
+log { source(s_src); destination(<%= "d_logsrv#{i}" -%>); };
+  <%- end -%>
+<%- end -%>

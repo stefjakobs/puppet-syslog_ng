@@ -1,0 +1,49 @@
+## This file is managed by puppet
+
+# 10globalfilter.conf
+# Owner: root
+# Group: log
+
+@define prefix '<%= @base_dir -%>'
+
+# --------------------------- #
+###### Start Host Filter ######
+# --------------------------- #
+
+filter f_dhcp_server {
+   host(dhcp0) or host(dhcp1);
+};
+
+filter f_mailrelay {
+   host(charybdis) or host(medousa) or
+   host(hydra) or host(charon) or host(virbius);
+};
+
+filter f_mbox { host(mbox) or host(mbox-1) or host(mbox-2); };
+
+filter f_radiator {
+   host(radius1) or host(radius2) or
+   host(logsrv2);
+};
+
+filter f_dhcp {
+   host(dhcp0) or host(dhcp1) or host(dns-hm0) or host(ipam);
+};
+
+filter f_dns0 { host(dns0) or host(dns0-m); };
+
+filter f_dns1 { host(dns1) or host(dns1-m); };
+
+# -------------------------- #
+###### Ende Host Filter ######
+# -------------------------- #
+
+# ----------------------------- #
+###### Start Dienst Filter ######
+# ----------------------------- #
+
+
+# ---------------------------- #
+###### Ende Dienst Filter ######
+# ---------------------------- #
+

@@ -1,6 +1,6 @@
 # install syslog-ng
 class syslog_ng::install {
-  rus::package {
+  package {
     'syslog-ng':
       ensure => present;
     'rsyslog':
